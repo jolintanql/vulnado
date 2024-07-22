@@ -52,6 +52,14 @@ pipeline {
                 alwaysLinkToLastBuild: true, 
                 allowMissing: false
             ])
+	   publishHTML([
+                reportName: 'SpotBugs Report', 
+                reportDir: 'target/site', 
+                reportFiles: 'spotbugs.html',
+                keepAll: true, 
+                alwaysLinkToLastBuild: true, 
+                allowMissing: false
+            ])
         }
     }
 }
