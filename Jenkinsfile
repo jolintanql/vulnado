@@ -13,13 +13,37 @@ pipeline {
                 '''
             }
         }
-        stage('Analysis') {
+        stage('Static Code Analysis') {
             steps {
-                sh '''
-                    /var/jenkins_home/apache-maven-3.6.3/bin/mvn --batch-mode -V -U -e checkstyle:checkstyle pmd:pmd pmd:cpd findbugs:findbugs
-                '''
+                script {
+                    // Checkstyle Analysis
+                    sh '''
+                        /var/jenkins_home/apache-maven-3.6.3/bin/mvn checkstyle:checkstyle
+                    '''
+                    // PMD Analysis
+                    sh '''
+                        /var/jenkins_home/apache-maven-3.6.3/bin/mvn pmd:pmd pmd:cpd
+                    '''
+                    // SpotBugs Analysis
+                    sh '''
+                        /var/jenkins_home/apache-maven-3.6.3/bin/mvn spotbugs:spotbugs
+                    '''
+                }
+            }
+        }
+        stage('Report') {
+            steps {
+                publishHTML([reportName: 'Checkstyle Report', reportDir: 'target/site', reportFiles: 'checkstyle.html'])
+                publishHTML([reportName: 'PMD Report', reportDir: 'target/site', reportFiles: 'pmd.html'])
+                publishHTML([reportName: 'CPD Report', reportDir: 'target/site', reportFiles: 'cpd.html'])
+                publishHTML([reportName: 'SpotBugs Report', reportDir: 'target/site', reportFiles: 'spotbugs.html'])
             }
         }
     }
+    post {
+        always {
+            junit 'target/surefire-reports/**/*.xml'
+            archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true
+        }
+    }
 }
-
