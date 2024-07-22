@@ -15,63 +15,43 @@ pipeline {
         }
         stage('Static Code Analysis') {
             steps {
-                script {
-                    // Checkstyle Analysis
-                    sh '''
-                        /var/jenkins_home/apache-maven-3.6.3/bin/mvn checkstyle:checkstyle
-                    '''
-                    // PMD Analysis
-                    sh '''
-                        /var/jenkins_home/apache-maven-3.6.3/bin/mvn pmd:pmd pmd:cpd
-                    '''
-                    // SpotBugs Analysis
-                    sh '''
-                        /var/jenkins_home/apache-maven-3.6.3/bin/mvn spotbugs:spotbugs
-                    '''
-                }
-            }
-        }
-        stage('Report') {
-            steps {
-                publishHTML([
-                    reportName: 'Checkstyle Report', 
-                    reportDir: 'target/site', 
-                    reportFiles: 'checkstyle.html',
-                    keepAll: true, 
-                    alwaysLinkToLastBuild: true, 
-                    allowMissing: false
-                ])
-                publishHTML([
-                    reportName: 'PMD Report', 
-                    reportDir: 'target/site', 
-                    reportFiles: 'pmd.html',
-                    keepAll: true, 
-                    alwaysLinkToLastBuild: true, 
-                    allowMissing: false
-                ])
-                publishHTML([
-                    reportName: 'CPD Report', 
-                    reportDir: 'target/site', 
-                    reportFiles: 'cpd.html',
-                    keepAll: true, 
-                    alwaysLinkToLastBuild: true, 
-                    allowMissing: false
-                ])
-                publishHTML([
-                    reportName: 'SpotBugs Report', 
-                    reportDir: 'target/site', 
-                    reportFiles: 'spotbugs.html',
-                    keepAll: true, 
-                    alwaysLinkToLastBuild: true, 
-                    allowMissing: false
-                ])
+                sh '''
+                    /var/jenkins_home/apache-maven-3.6.3/bin/mvn checkstyle:checkstyle pmd:pmd pmd:cpd
+                '''
             }
         }
     }
     post {
         always {
-            junit 'target/surefire-reports/**/*.xml'
-            archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true
+            junit testResults: '**/target/surefire-reports/TEST-*.xml'
+            recordIssues enabledForFailure: true, tools: [mavenConsole(), java(), javaDoc()]
+            recordIssues enabledForFailure: true, tool: checkStyle()
+            recordIssues enabledForFailure: true, tool: cpd(pattern: '**/target/cpd.xml')
+            recordIssues enabledForFailure: true, tool: pmdParser(pattern: '**/target/pmd.xml')
+            publishHTML([
+                reportName: 'Checkstyle Report', 
+                reportDir: 'target/site', 
+                reportFiles: 'checkstyle.html',
+                keepAll: true, 
+                alwaysLinkToLastBuild: true, 
+                allowMissing: false
+            ])
+            publishHTML([
+                reportName: 'PMD Report', 
+                reportDir: 'target/site', 
+                reportFiles: 'pmd.html',
+                keepAll: true, 
+                alwaysLinkToLastBuild: true, 
+                allowMissing: false
+            ])
+            publishHTML([
+                reportName: 'CPD Report', 
+                reportDir: 'target/site', 
+                reportFiles: 'cpd.html',
+                keepAll: true, 
+                alwaysLinkToLastBuild: true, 
+                allowMissing: false
+            ])
         }
     }
 }
