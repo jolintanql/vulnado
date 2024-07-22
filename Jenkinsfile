@@ -33,10 +33,38 @@ pipeline {
         }
         stage('Report') {
             steps {
-                publishHTML([reportName: 'Checkstyle Report', reportDir: 'target/site', reportFiles: 'checkstyle.html'])
-                publishHTML([reportName: 'PMD Report', reportDir: 'target/site', reportFiles: 'pmd.html'])
-                publishHTML([reportName: 'CPD Report', reportDir: 'target/site', reportFiles: 'cpd.html'])
-                publishHTML([reportName: 'SpotBugs Report', reportDir: 'target/site', reportFiles: 'spotbugs.html'])
+                publishHTML([
+                    reportName: 'Checkstyle Report', 
+                    reportDir: 'target/site', 
+                    reportFiles: 'checkstyle.html',
+                    keepAll: true, 
+                    alwaysLinkToLastBuild: true, 
+                    allowMissing: false
+                ])
+                publishHTML([
+                    reportName: 'PMD Report', 
+                    reportDir: 'target/site', 
+                    reportFiles: 'pmd.html',
+                    keepAll: true, 
+                    alwaysLinkToLastBuild: true, 
+                    allowMissing: false
+                ])
+                publishHTML([
+                    reportName: 'CPD Report', 
+                    reportDir: 'target/site', 
+                    reportFiles: 'cpd.html',
+                    keepAll: true, 
+                    alwaysLinkToLastBuild: true, 
+                    allowMissing: false
+                ])
+                publishHTML([
+                    reportName: 'SpotBugs Report', 
+                    reportDir: 'target/site', 
+                    reportFiles: 'spotbugs.html',
+                    keepAll: true, 
+                    alwaysLinkToLastBuild: true, 
+                    allowMissing: false
+                ])
             }
         }
     }
